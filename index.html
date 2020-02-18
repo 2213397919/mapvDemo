@@ -1,0 +1,465 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+
+    <style type="text/css">
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        #ListData {
+            width: 25%;
+            height: 94%;
+            background: transparent;
+            position: absolute;
+            top: 30px;
+            left: 0;
+            overflow: scroll;
+            color: #fff;
+            /* 兼容IE10+ */
+            -ms-overflow-style: none;
+            /* Firefox */
+            overflow: -moz-scrollbars-none;
+        }
+
+        /* 兼容chrome 和Safari*/
+        #ListData::-webkit-scrollbar {
+            width: 0 !important
+        }
+
+        #total {
+            width: 100%;
+            height: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 50px;
+            position: absolute;
+            background: #031628;
+            bottom: 0;
+            left: 0;
+        }
+
+        #logo {
+            width: 263px;
+            height: 46px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        img {
+            width: 100%;
+            height: 100%;
+        }
+
+        #timeLine {
+            width: 100%;
+            height: 30px;
+            line-height: 30px;
+            color: #fff;
+            position: absolute;
+            top: 0;
+            left: 0;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .title {
+            width: 25%;
+            height: 30px;
+            color: #fff;
+            line-height: 30px;
+            font-size: 15px;
+            font-weight: 800;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 地图 -->
+    <div id="map">
+    </div>
+    <!-- 救援队表头 -->
+    <div class="title">各地支援湖北的医疗队</div>
+    <!-- 救援队列表 -->
+    <div id="ListData">
+    </div>
+    <!-- 企业logo -->
+    <div id="logo">
+        <img src="./logo.png" />
+    </div>
+    <!-- 医疗队总数 -->
+    <div id="total">
+    </div>
+    <!-- 时间轮播 -->
+    <div id="timeLine"></div>
+    <!-- 画布 -->
+    <canvas id="canvas"></canvas>
+
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=1XjLLEhZhQNUzd93EjU5nOGQ"></script>
+    <script type="text/javascript" src="http://mapv.baidu.com/build/mapv.min.js"></script>
+
+    <script type="text/javascript">
+        // 百度地图API功能
+        var map = new BMap.Map("map", {
+            enableMapClick: false
+        });    // 创建Map实例
+        map.centerAndZoom(new BMap.Point(105.403119, 38.028658), 5);  // 初始化地图,设置中心点坐标和地图级别
+        map.enableScrollWheelZoom(true); // 开启鼠标滚轮缩放
+
+        map.setMapStyle({
+            styleJson: [{
+                "featureType": "water",
+                "elementType": "all",
+                "stylers": {
+                    "color": "#031628"
+                }
+            }, {
+                "featureType": "land",
+                "elementType": "geometry",
+                "stylers": {
+                    "color": "#000102"
+                }
+            }, {
+                "featureType": "highway",
+                "elementType": "geometry.fill",
+                "stylers": {
+                    "color": "#000000"
+                }
+            }, {
+                "featureType": "highway",
+                "elementType": "geometry.stroke",
+                "stylers": {
+                    "color": "#147a92"
+                }
+            }, {
+                "featureType": "arterial",
+                "elementType": "geometry.fill",
+                "stylers": {
+                    "color": "#000000"
+                }
+            }, {
+                "featureType": "arterial",
+                "elementType": "geometry.stroke",
+                "stylers": {
+                    "color": "#0b3d51"
+                }
+            }, {
+                "featureType": "local",
+                "elementType": "geometry",
+                "stylers": {
+                    "color": "#000000"
+                }
+            }, {
+                "featureType": "railway",
+                "elementType": "geometry.fill",
+                "stylers": {
+                    "color": "#000000"
+                }
+            }, {
+                "featureType": "railway",
+                "elementType": "geometry.stroke",
+                "stylers": {
+                    "color": "#08304b"
+                }
+            }, {
+                "featureType": "subway",
+                "elementType": "geometry",
+                "stylers": {
+                    "lightness": -70
+                }
+            }, {
+                "featureType": "building",
+                "elementType": "geometry.fill",
+                "stylers": {
+                    "color": "#000000"
+                }
+            }, {
+                "featureType": "all",
+                "elementType": "labels.text.fill",
+                "stylers": {
+                    "color": "#857f7f"
+                }
+            }, {
+                "featureType": "all",
+                "elementType": "labels.text.stroke",
+                "stylers": {
+                    "color": "#000000"
+                }
+            }, {
+                "featureType": "building",
+                "elementType": "geometry",
+                "stylers": {
+                    "color": "#022338"
+                }
+            }, {
+                "featureType": "green",
+                "elementType": "geometry",
+                "stylers": {
+                    "color": "#062032"
+                }
+            }, {
+                "featureType": "boundary",
+                "elementType": "all",
+                "stylers": {
+                    "color": "#465b6c"
+                }
+            }, {
+                "featureType": "manmade",
+                "elementType": "all",
+                "stylers": {
+                    "color": "#022338"
+                }
+            }, {
+                "featureType": "label",
+                "elementType": "all",
+                "stylers": {
+                    "color": "#022338",
+                    "visibility": "off"
+                }
+            }]
+        });
+
+        $.get('https://www.zhitakeji.com:6060/styles/transparency/style.json', (geojson) => {
+            console.log("geojson", geojson)
+            $.get('http://114.255.136.222:7000/pneumonia/medical_team', (medicalTeamData) => {
+                // 轮播列表部分
+                var ListData = document.getElementById("ListData")
+                // 支援医疗人数ID
+                var Total = document.getElementById("total")
+                // 轮播时间ID
+                var timeLine = document.getElementById("timeLine")
+                // 获取日期
+                var data_time = new Date()
+                // 获取年份
+                var year = data_time.getFullYear()
+                // 获取月份
+                var month = data_time.getMonth() + 1
+                // 获取日
+                var time = data_time.getDate()
+                // 定时器
+                var timer = null
+                var begin = 0
+                var data_length = medicalTeamData.data.data.length
+                // 支援医疗人数拼串
+                var str = ''
+                var qqq = null
+                timer = setInterval(() => {
+                    str = ''
+                    qqq = null
+                    if (begin < data_length) {
+                        qqq = medicalTeamData.data.data[begin].data
+                        var geojsonOptions = {
+                            gradient: {
+                                0: 'rgba(55, 50, 250, 0.4)',
+                                1: 'rgba(55, 50, 250, 1)'
+                            },
+                            max: 354551,
+                            draw: 'intensity'
+                        }
+
+                        var geojsonDataSet = mapv.geojson.getDataSet(geojson);
+                        var qianxi = new mapv.DataSet(qqq);
+
+                        var qianxiData = qianxi.get();
+
+                        // console.log("qianxiData", qianxiData)
+
+                        var lineData = [];
+                        var pointData = [];
+                        var textData = [];
+                        var timeData = [];
+
+                        var citys = {}
+
+                        for (var i = 0; i < qianxiData.length; i++) {
+                            var fromCenter = mapv.utilCityCenter.getCenterByCityName(qianxiData[i].from);
+                            var toCenter = mapv.utilCityCenter.getCenterByCityName(qianxiData[i].to);
+                            if (!fromCenter || !toCenter) {
+                                continue;
+                            }
+                            citys[qianxiData[i].from] = qianxiData[i].count;
+                            citys[qianxiData[i].to] = 100;
+                            pointData.push(
+                                {
+                                    geometry: {
+                                        type: 'Point',
+                                        coordinates: [fromCenter.lng, fromCenter.lat]
+                                    }
+                                }
+                            );
+                            pointData.push(
+                                {
+                                    geometry: {
+                                        type: 'Point',
+                                        coordinates: [toCenter.lng, toCenter.lat]
+                                    }
+                                }
+                            );
+                            textData.push(
+                                {
+                                    geometry: {
+                                        type: 'Point',
+                                        coordinates: [fromCenter.lng, fromCenter.lat]
+                                    },
+                                    text: qianxiData[i].from
+                                }
+                            );
+                            textData.push(
+                                {
+                                    geometry: {
+                                        type: 'Point',
+                                        coordinates: [toCenter.lng, toCenter.lat]
+                                    },
+                                    text: qianxiData[i].to
+                                }
+                            );
+
+                            var curve = mapv.utilCurve.getPoints([fromCenter, toCenter]);
+
+                            for (j = 0; j < curve.length; j++) {
+                                timeData.push({
+                                    geometry: {
+                                        type: 'Point',
+                                        coordinates: curve[j]
+                                    },
+                                    count: 1,
+                                    time: j
+                                });
+                            }
+
+                            lineData.push({
+                                geometry: {
+                                    type: 'LineString',
+                                    coordinates: curve
+                                    //coordinates: [[fromCenter.lng, fromCenter.lat], [toCenter.lng, toCenter.lat]]
+                                },
+                                count: 30 * Math.random()
+                            });
+
+                        }
+
+                        var data = geojsonDataSet.get({
+                            filter: function (item) {
+
+                                if (!citys[item.name]) {
+                                    return false;
+                                }
+
+                                item.count = citys[item.name];
+                                return true;
+                            }
+                        });
+                        geojsonDataSet = new mapv.DataSet();
+                        // console.log("geojsonDataSet", geojsonDataSet)
+
+                        var mapvLayer = new mapv.baiduMapLayer(map, geojsonDataSet, geojsonOptions);
+
+                        var textDataSet = new mapv.DataSet(textData);
+
+                        var textOptions = {
+                            draw: 'text',
+                            font: '14px Arial',
+                            fillStyle: 'white',
+                            shadowColor: 'yellow',
+                            shadowBlue: 10,
+                            zIndex: 11,
+                            shadowBlur: 10
+                        }
+
+                        var textMapvLayer = new mapv.baiduMapLayer(map, textDataSet, textOptions);
+
+                        var lineDataSet = new mapv.DataSet(lineData);
+
+                        var lineOptions = {
+                            strokeStyle: 'rgba(255, 250, 50, 0.8)',
+                            shadowColor: 'rgba(255, 250, 50, 1)',
+                            shadowBlur: 20,
+                            lineWidth: 2,
+                            zIndex: 100,
+                            draw: 'simple'
+                        }
+
+                        var lineLayer = new mapv.baiduMapLayer(map, lineDataSet, lineOptions);
+
+                        var pointOptions = {
+                            fillStyle: 'rgba(254,175,3,0.7)',
+                            shadowColor: 'rgba(55, 50, 250, 0.5)',
+                            shadowBlur: 10,
+                            size: 5,
+                            zIndex: 10,
+                            draw: 'simple'
+                        }
+
+
+                        var pointDataSet = new mapv.DataSet(pointData);
+
+                        var pointLayer = new mapv.baiduMapLayer(map, pointDataSet, pointOptions);
+
+
+                        var timeDataSet = new mapv.DataSet(timeData);
+
+                        // console.log(timeData);
+
+                        var timeOptions = {
+                            fillStyle: 'rgba(255, 250, 250, 0.5)',
+                            zIndex: 200,
+                            size: 2.5,
+                            animation: {
+                                type: 'time',
+                                stepsRange: {
+                                    start: 0,
+                                    end: 50
+                                },
+                                trails: 10,
+                                duration: 2,
+                            },
+                            draw: 'simple'
+                        }
+
+                        var timeMapvLayer = new mapv.baiduMapLayer(map, timeDataSet, timeOptions);
+                        for (j = 0; j < medicalTeamData.data.data[begin].data.length; j++) {
+                            str = str + '<div style="width: 100%; height: 30px; line-height: 30px;color: #fff; text-align: center;">' +
+                                '<span style="display: inline-block;width: 33%;height: 100%;">' + medicalTeamData.data.data[begin].data[j].from + '</span>'
+                                + '<span style="display: inline-block;width: 34%;height: 100%;">' + '第' + medicalTeamData.data.data[begin].data[j].patch + '批次' + '</span>'
+                                + '<span style="display: inline-block;width: 33%;height: 100%;">' + medicalTeamData.data.data[begin].data[j].count + '</span>' + '</div>'
+                        }
+                        ListData.innerHTML = str
+                        timeLine.innerHTML = '<div>' + medicalTeamData.data.data[begin].date + '</div>'
+                        begin++
+                    } else {
+                        begin = 0
+                    }
+                }, 1000)
+
+
+                // 支援医疗队列表拼串
+                var totalData = '<div style="color: #fff; text-align: center; line-height: 50px;">' + '截止到' + year
+                    + '年' + month + '月' + time + '日' + '各地共抽调了'
+                    + medicalTeamData.data.allPatch + '支医疗队' + medicalTeamData.data.count + '名医疗队员驰援武汉(不含军队医疗队和队员)' + '</div>'
+                Total.innerHTML = totalData
+            })
+        });
+    </script>
+
+</body>
+
+</html>
